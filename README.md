@@ -4,6 +4,26 @@ This repository is a collection of various approaches to archieve the fastest po
 
 For now, the focus is on CPU model inference to pave the way for fast 2-bit model inference on edge devices running ARM processors. It will be extended to include x86 cpus and multiprocessing for more general consumer inference.
 
+## Core ideas
+
+Most approaches have been structured like BLAS/BLIS with a microkernel and repacking a and b to be contiguous in memory.
+
+The ternary microkernel is currently only a little less than 2x as efficient as the base int8 case, which we should be able to get closer to the theoretical limit of 4x.
+
+It works like this:
+
+First we compress a ternary matrix `A(m, k)` into two separete matrixes, `A_val(m, k / 8)` and `A_sign(m, k / 8)`, where `A_val` contains all val bits (i.e. 1 if the ternary value is either 1 or -1) and `A_sign` contains all sign bits (i.e. 1 if the ternary value is -1).
+
+Then we calculate a part of C by dotting a compressed vector from `a` and `b` using purely bit manipulation (no multiplication):
+
+| step | description                                                              | pseudocode                           |
+| ---- | ------------------------------------------------------------------------ | ------------------------------------ |
+| 1    | Calc value bits with bitwise AND                                         | `c_val = a_val & b_val`              |
+| 2    | Calc sign bits with bitwise xor between signs and bitwise and with value | `c_sign = (a_sign ^ b_sign) & c_val` |
+| 3    | Count bits in values                                                     | `c_val_count = popcount(c_val)`      |
+| 4    | Count bits in signs                                                      | `c_sign_count = popcount(c_sign)`    |
+| 5    | Subtract 2x sign count (with bitshift) from val count                    | `c = val_count - sign_count << 1`    |
+
 ## Structure
 
 Each attempt of matrix multiplication is contained in its own file in the `muls/` directory. Each attempt is purposefully verbose - the goal is to discover a fast way, not make production-level code.
