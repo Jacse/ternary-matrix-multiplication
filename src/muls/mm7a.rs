@@ -58,65 +58,40 @@ fn dot16x16(k: usize, a_vals: &[u8], a_signs: &[u8], b_vals: &[u8], b_signs: &[u
     // Load initial values from c
     let mut ab = vec![Simd::<i8, 16>::splat(0); 16];
 
-    ab[0] = Simd::from_slice(&c[c_at(0, 0)..(c_at(0, 0) + 16)]);
-    ab[1] = Simd::from_slice(&c[c_at(0, 1)..(c_at(0, 1) + 16)]);
-    ab[2] = Simd::from_slice(&c[c_at(0, 2)..(c_at(0, 2) + 16)]);
-    ab[3] = Simd::from_slice(&c[c_at(0, 3)..(c_at(0, 3) + 16)]);
-    ab[4] = Simd::from_slice(&c[c_at(0, 4)..(c_at(0, 4) + 16)]);
-    ab[5] = Simd::from_slice(&c[c_at(0, 5)..(c_at(0, 5) + 16)]);
-    ab[6] = Simd::from_slice(&c[c_at(0, 6)..(c_at(0, 6) + 16)]);
-    ab[7] = Simd::from_slice(&c[c_at(0, 7)..(c_at(0, 7) + 16)]);
-    ab[8] = Simd::from_slice(&c[c_at(0, 8)..(c_at(0, 8) + 16)]);
-    ab[9] = Simd::from_slice(&c[c_at(0, 9)..(c_at(0, 9) + 16)]);
-    ab[10] = Simd::from_slice(&c[c_at(0, 10)..(c_at(0, 10) + 16)]);
-    ab[11] = Simd::from_slice(&c[c_at(0, 11)..(c_at(0, 11) + 16)]);
-    ab[12] = Simd::from_slice(&c[c_at(0, 12)..(c_at(0, 12) + 16)]);
-    ab[13] = Simd::from_slice(&c[c_at(0, 13)..(c_at(0, 13) + 16)]);
-    ab[14] = Simd::from_slice(&c[c_at(0, 14)..(c_at(0, 14) + 16)]);
-    ab[15] = Simd::from_slice(&c[c_at(0, 15)..(c_at(0, 15) + 16)]);
+    ab[0] = c[c_at(0, 0)..(c_at(0, 0) + 16)].as_simd().1[0];
+    ab[1] = c[c_at(0, 1)..(c_at(0, 1) + 16)].as_simd().1[0];
+    ab[2] = c[c_at(0, 2)..(c_at(0, 2) + 16)].as_simd().1[0];
+    ab[3] = c[c_at(0, 3)..(c_at(0, 3) + 16)].as_simd().1[0];
+    ab[4] = c[c_at(0, 4)..(c_at(0, 4) + 16)].as_simd().1[0];
+    ab[5] = c[c_at(0, 5)..(c_at(0, 5) + 16)].as_simd().1[0];
+    ab[6] = c[c_at(0, 6)..(c_at(0, 6) + 16)].as_simd().1[0];
+    ab[7] = c[c_at(0, 7)..(c_at(0, 7) + 16)].as_simd().1[0];
+    ab[8] = c[c_at(0, 8)..(c_at(0, 8) + 16)].as_simd().1[0];
+    ab[9] = c[c_at(0, 9)..(c_at(0, 9) + 16)].as_simd().1[0];
+    ab[10] = c[c_at(0, 10)..(c_at(0, 10) + 16)].as_simd().1[0];
+    ab[11] = c[c_at(0, 11)..(c_at(0, 11) + 16)].as_simd().1[0];
+    ab[12] = c[c_at(0, 12)..(c_at(0, 12) + 16)].as_simd().1[0];
+    ab[13] = c[c_at(0, 13)..(c_at(0, 13) + 16)].as_simd().1[0];
+    ab[14] = c[c_at(0, 14)..(c_at(0, 14) + 16)].as_simd().1[0];
+    ab[15] = c[c_at(0, 15)..(c_at(0, 15) + 16)].as_simd().1[0];
 
-    for ki in (0..k).step_by(4) {
+    for ki in 0..k {
         // Load one col of 16 rows of A (=> 8*16=128 ternary values )
-        let a1_val = Simd::<u8, 16>::from_slice(&a_vals[(ki * 16)..(ki * 16 + 16)]);
-        let a1_sign = Simd::<u8, 16>::from_slice(&a_signs[(ki * 16)..(ki * 16 + 16)]);
-        let a2_val = Simd::<u8, 16>::from_slice(&a_vals[(ki * 16 + 16)..(ki * 16 + 32)]);
-        let a2_sign = Simd::<u8, 16>::from_slice(&a_signs[(ki * 16 + 16)..(ki * 16 + 32)]);
-
-        let a3_val = Simd::<u8, 16>::from_slice(&a_vals[(ki * 16 + 32)..(ki * 16 + 48)]);
-        let a3_sign = Simd::<u8, 16>::from_slice(&a_signs[(ki * 16 + 32)..(ki * 16 + 48)]);
-        let a4_val = Simd::<u8, 16>::from_slice(&a_vals[(ki * 16 + 48)..(ki * 16 + 64)]);
-        let a4_sign = Simd::<u8, 16>::from_slice(&a_signs[(ki * 16 + 48)..(ki * 16 + 64)]);
-
+        let a_val = Simd::<u8, 16>::from_slice(&a_vals[(ki * 16)..(ki * 16 + 16)]);
+        let a_sign = Simd::<u8, 16>::from_slice(&a_signs[(ki * 16)..(ki * 16 + 16)]);
         // Load one row of 16 cols of B
-        let b1_val = Simd::<u8, 16>::from_slice(&b_vals[(ki * 16)..(ki * 16 + 16)]);
-        let b1_sign = Simd::<u8, 16>::from_slice(&b_signs[(ki * 16)..(ki * 16 + 16)]);
-        let b2_val = Simd::<u8, 16>::from_slice(&b_vals[(ki * 16 + 16)..(ki * 16 + 32)]);
-        let b2_sign = Simd::<u8, 16>::from_slice(&b_signs[(ki * 16 + 16)..(ki * 16 + 32)]);
-
-        let b3_val = Simd::<u8, 16>::from_slice(&b_vals[(ki * 16 + 32)..(ki * 16 + 48)]);
-        let b3_sign = Simd::<u8, 16>::from_slice(&b_signs[(ki * 16 + 32)..(ki * 16 + 48)]);
-        let b4_val = Simd::<u8, 16>::from_slice(&b_vals[(ki * 16 + 48)..(ki * 16 + 64)]);
-        let b4_sign = Simd::<u8, 16>::from_slice(&b_signs[(ki * 16 + 48)..(ki * 16 + 64)]);
+        let b_val = Simd::<u8, 16>::from_slice(&b_vals[(ki * 16)..(ki * 16 + 16)]);
+        let b_sign = Simd::<u8, 16>::from_slice(&b_signs[(ki * 16)..(ki * 16 + 16)]);
 
         // Compute
         macro_rules! set_c {
             ($i:expr) => {
                 // Broadcast ith lane (col) in B to a full 16-col simd
-                let b1_val_i = Simd::splat(b1_val[$i]); // vdupq_laneq_u8 in aarch64 asm
-                let b1_sign_i = Simd::splat(b1_sign[$i]);
-                let b2_val_i = Simd::splat(b2_val[$i]);
-                let b2_sign_i = Simd::splat(b2_sign[$i]);
-
-                let b3_val_i = Simd::splat(b3_val[$i]); // vdupq_laneq_u8 in aarch64 asm
-                let b3_sign_i = Simd::splat(b3_sign[$i]);
-                let b4_val_i = Simd::splat(b4_val[$i]);
-                let b4_sign_i = Simd::splat(b4_sign[$i]);
+                let b_val_i = Simd::splat(b_val[$i]); // vdupq_laneq_u8 in aarch64 asm
+                let b_sign_i = Simd::splat(b_sign[$i]);
 
                 // output 16 rows to C (16 rows of A x ith col of B)
-                ab[$i] += dot(a1_val, a1_sign, b1_val_i, b1_sign_i);
-                ab[$i] += dot(a2_val, a2_sign, b2_val_i, b2_sign_i);
-                ab[$i] += dot(a3_val, a3_sign, b3_val_i, b3_sign_i);
-                ab[$i] += dot(a4_val, a4_sign, b4_val_i, b4_sign_i);
+                ab[$i] += dot(a_val, a_sign, b_val_i, b_sign_i);
             };
         }
 
@@ -137,24 +112,6 @@ fn dot16x16(k: usize, a_vals: &[u8], a_signs: &[u8], b_vals: &[u8], b_signs: &[u
         set_c!(14);
         set_c!(15);
     }
-
-    c[c_at(0, 0)..(c_at(0, 0) + 16)].copy_from_slice(&ab[0].to_array());
-    c[c_at(0, 1)..(c_at(0, 1) + 16)].copy_from_slice(&ab[1].to_array());
-    c[c_at(0, 2)..(c_at(0, 2) + 16)].copy_from_slice(&ab[2].to_array());
-    c[c_at(0, 3)..(c_at(0, 3) + 16)].copy_from_slice(&ab[3].to_array());
-    c[c_at(0, 4)..(c_at(0, 4) + 16)].copy_from_slice(&ab[4].to_array());
-    c[c_at(0, 5)..(c_at(0, 5) + 16)].copy_from_slice(&ab[5].to_array());
-    c[c_at(0, 6)..(c_at(0, 6) + 16)].copy_from_slice(&ab[6].to_array());
-    c[c_at(0, 7)..(c_at(0, 7) + 16)].copy_from_slice(&ab[7].to_array());
-
-    c[c_at(0, 8)..(c_at(0, 8) + 16)].copy_from_slice(&ab[8].to_array());
-    c[c_at(0, 9)..(c_at(0, 9) + 16)].copy_from_slice(&ab[9].to_array());
-    c[c_at(0, 10)..(c_at(0, 10) + 16)].copy_from_slice(&ab[10].to_array());
-    c[c_at(0, 11)..(c_at(0, 11) + 16)].copy_from_slice(&ab[11].to_array());
-    c[c_at(0, 12)..(c_at(0, 12) + 16)].copy_from_slice(&ab[12].to_array());
-    c[c_at(0, 13)..(c_at(0, 13) + 16)].copy_from_slice(&ab[13].to_array());
-    c[c_at(0, 14)..(c_at(0, 14) + 16)].copy_from_slice(&ab[14].to_array());
-    c[c_at(0, 15)..(c_at(0, 15) + 16)].copy_from_slice(&ab[15].to_array());
 }
 
 fn pack_b(k: usize, n: usize, b: &[u8], packed: &mut [u8]) {
@@ -281,7 +238,7 @@ where
     out
 }
 
-pub fn prep9(a: &[i8], b: &[i8]) -> (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) {
+pub fn prep7a(a: &[i8], b: &[i8]) -> (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) {
     // one u16 contains 8 ternary values (u8 vals + u8 signs)
     // So the resulting matrix is 4x smaller than the original
 
@@ -295,7 +252,7 @@ pub fn prep9(a: &[i8], b: &[i8]) -> (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) {
     (a_vals, a_signs, b_vals, b_signs)
 }
 
-pub fn matmul9(a_vals: &[u8], a_signs: &[u8], b_vals: &[u8], b_signs: &[u8]) -> Vec<i8> {
+pub fn matmul7a(a_vals: &[u8], a_signs: &[u8], b_vals: &[u8], b_signs: &[u8]) -> Vec<i8> {
     let (m, k, n) = (SIZE, SIZE / 8, SIZE);
     let mut c = vec![0; m * n];
 
@@ -366,13 +323,13 @@ pub fn matmul9(a_vals: &[u8], a_signs: &[u8], b_vals: &[u8], b_signs: &[u8]) -> 
 mod tests {
     use crate::{constants::SIZE, test_util::test_util::test_matmul};
 
-    use super::{matmul9, prep9};
+    use super::{matmul7a, prep7a};
 
     #[test]
     fn test() {
         test_matmul(|a, b| {
-            let (av, asi, bv, bs) = prep9(&a, &b);
-            matmul9(&av, &asi, &bv, &bs)
+            let (av, asi, bv, bs) = prep7a(&a, &b);
+            matmul7a(&av, &asi, &bv, &bs)
         })
     }
 }

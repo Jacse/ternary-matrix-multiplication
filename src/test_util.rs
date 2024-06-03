@@ -35,9 +35,9 @@ pub mod test_util {
         let res_array = Array2::from_shape_vec((m, n).f(), res).unwrap();
 
         println!("Res:\n");
-        print_matrix(&res_clone, 16, 16, 16, 1);
+        print_matrix(&res_clone, 32, 32, 32, 1);
         println!("Res true:\n");
-        print_matrix(&res_true.clone().into_raw_vec(), 16, 16, 16, 1);
+        print_matrix(&res_true.clone().into_raw_vec(), 32, 32, 32, 1);
 
         assert_eq!(res_array, res_true);
     }
@@ -62,11 +62,7 @@ pub fn print_matrix(inp: &[i8], rows: usize, cols: usize, cstride: usize, rstrid
     for ri in 0..rows {
         for ci in 0..cols {
             let val = inp[cstride * ci + ri * rstride];
-            if val >= 0 {
-                print!(" {} ", val);
-            } else {
-                print!("{} ", val);
-            }
+            print!(" {:0<2} ", val);
         }
         println!("");
     }
