@@ -59,9 +59,8 @@ bench_ndarray  ... bench:   2,767,095 ns/iter (+/- 111,917)
 
 # Todos
 
-- Test prefetch CPU instructions
-- Benchmarking on non-mac ARM processor
 - Multithreading
+- Alt packing (pack 5 trits into a byte)
+- CUDA/Triton kernel
 - x86_64 core
   - test avx2-based 32x32 kernel
-- CUDA/Triton kernel

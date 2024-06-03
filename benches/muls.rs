@@ -10,7 +10,6 @@ mod tests {
         muls::{
             mm1::matmul1,
             mm10::{matmul10, prep10},
-            mm11::{matmul11, prep11},
             mm2::matmul2,
             mm3::matmul3,
             mm4::matmul4,
