@@ -1,6 +1,7 @@
 #![feature(portable_simd)]
 #![feature(stdarch_aarch64_prefetch)]
 #![feature(core_intrinsics)]
+pub mod dots;
 pub mod muls;
 
 pub mod constants;

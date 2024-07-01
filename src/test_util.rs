@@ -10,7 +10,7 @@ pub mod test_util {
         let k = SIZE;
         let n = SIZE;
 
-        let (a, b) = rand_vecs();
+        let (a, b) = rand_vecs(SIZE * SIZE);
 
         let a_array = Array2::from_shape_vec(
             (m, k).f(),
@@ -42,10 +42,48 @@ pub mod test_util {
         assert_eq!(res_array, res_true);
     }
 
-    pub fn rand_vecs() -> (Vec<i8>, Vec<i8>) {
+    pub fn test_kernel(
+        kernel: fn(m: usize, k: usize, n: usize, a: &[i8], b: &[i8]) -> Vec<i8>,
+    ) -> () {
+        let m = 16;
+        let k = 256;
+        let n = 16;
+
+        let (a, b) = rand_vecs(m * k);
+
+        let a_array = Array2::from_shape_vec(
+            (m, k).f(),
+            // Convert to f32 to make it faster
+            a.clone().into_iter().map(|e| e as f32).collect(),
+        )
+        .unwrap()
+        .to_owned();
+
+        let b_array = Array2::from_shape_vec(
+            (k, n).f(),
+            b.clone().into_iter().map(|e| e as f32).collect(),
+        )
+        .unwrap();
+
+        let res_true = a_array.dot(&b_array).map(|f| *f as i8);
+
+        let res = kernel(m, k, n, &a, &b);
+
+        let res_clone = res.clone();
+
+        let res_array = Array2::from_shape_vec((m, n).f(), res).unwrap();
+        println!("Res:\n");
+        print_matrix(&res_clone, 16, 16, 16, 1);
+        println!("Res true:\n");
+        print_matrix(&res_true.clone().into_raw_vec(), 16, 16, 16, 1);
+
+        assert_eq!(res_array, res_true);
+    }
+
+    pub fn rand_vecs(size: usize) -> (Vec<i8>, Vec<i8>) {
         let mut rng = StdRng::seed_from_u64(1337);
-        let a = rand_ternary_vec(&mut rng, SIZE * SIZE);
-        let b = rand_ternary_vec(&mut rng, SIZE * SIZE);
+        let a = rand_ternary_vec(&mut rng, size);
+        let b = rand_ternary_vec(&mut rng, size);
         (a, b)
     }
 
@@ -62,7 +100,7 @@ pub fn print_matrix(inp: &[i8], rows: usize, cols: usize, cstride: usize, rstrid
     for ri in 0..rows {
         for ci in 0..cols {
             let val = inp[cstride * ci + ri * rstride];
-            print!(" {:0<2} ", val);
+            print!(" {: >3} ", val);
         }
         println!("");
     }

@@ -6,6 +6,5 @@ pub mod mm4;
 pub mod mm5;
 pub mod mm6;
 pub mod mm7;
-pub mod mm7a;
 pub mod mm8;
 pub mod mm9;
